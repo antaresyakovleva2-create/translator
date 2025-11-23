@@ -3,10 +3,9 @@ import streamlit as st
 from openai import OpenAI
 from langdetect import detect
 
-# Hugging Face环境变量读取方式
 api_key = os.environ.get("OPENAI_API_KEY")
 if not api_key:
-    st.error("🔑 OpenAI API key not found! Please set it in Hugging Face secrets.")
+    st.error("🔑 OpenAI API key not found! Please set it in environment variables.")
     st.stop()
 
 client = OpenAI(api_key=api_key)
@@ -20,22 +19,26 @@ LANG_MAP = {
 
 def translate_with_gpt(text, target_language):
     try:
-        response = client.chat.completions.create(
+        response = client.responses.create(
             model="gpt-4o-mini",
-            messages=[
-                {"role": "system",
-                 "content": f"Translate the text into {target_language} in a natural, fluent tone."},
-                {"role": "user", "content": text}
+            input=[
+                {
+                    "role": "system",
+                    "content": f"Translate the text into {target_language} in a natural, fluent tone."
+                },
+                {
+                    "role": "user",
+                    "content": text
+                }
             ]
         )
-        return response.choices[0].message.content.strip()
+        return response.output_text
     except Exception as e:
         return f"翻译错误: {str(e)}"
 
 
 st.title("Tara's Translator App 💜")
 
-# Input box
 text = st.text_area("Enter text to translate:")
 
 if st.button("Translate"):
@@ -57,5 +60,3 @@ if st.button("Translate"):
             st.error(f"检测语言时出错: {str(e)}")
     else:
         st.warning("Please enter some text.")
-
-
