@@ -4,7 +4,7 @@ from openai import OpenAI
 from langdetect import detect
 
 # Hugging Face环境变量读取方式
-api_key = os.environ.get("")
+api_key = os.environ.get("OPENAI_API_KEY")
 if not api_key:
     st.error("🔑 OpenAI API key not found! Please set it in Hugging Face secrets.")
     st.stop()
@@ -57,4 +57,5 @@ if st.button("Translate"):
             st.error(f"检测语言时出错: {str(e)}")
     else:
         st.warning("Please enter some text.")
+
 
