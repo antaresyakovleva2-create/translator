@@ -1,14 +1,15 @@
 import os
 import streamlit as st
-from openai import OpenAI
+import openai
 from langdetect import detect
 
+# Use your OpenAI API key
 api_key = os.environ.get("OPENAI_API_KEY")
 if not api_key:
     st.error("🔑 OpenAI API key not found! Please set it in environment variables.")
     st.stop()
 
-client = OpenAI(api_key=api_key)
+openai.api_key = api_key
 
 LANG_MAP = {
     "zh-cn": "Chinese",
@@ -16,26 +17,18 @@ LANG_MAP = {
     "ru": "Russian"
 }
 
-
 def translate_with_gpt(text, target_language):
     try:
-        response = client.responses.create(
+        response = openai.ChatCompletion.create(
             model="gpt-4o-mini",
-            input=[
-                {
-                    "role": "system",
-                    "content": f"Translate the text into {target_language} in a natural, fluent tone."
-                },
-                {
-                    "role": "user",
-                    "content": text
-                }
+            messages=[
+                {"role": "system", "content": f"Translate the text into {target_language} in a natural, fluent tone."},
+                {"role": "user", "content": text}
             ]
         )
-        return response.output_text
+        return response.choices[0].message.content.strip()
     except Exception as e:
         return f"翻译错误: {str(e)}"
-
 
 st.title("Tara's Translator App 💜")
 
