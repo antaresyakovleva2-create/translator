@@ -1,62 +1,23 @@
-import os
 import streamlit as st
-from openai import OpenAI
-from langdetect import detect
+import os
 
-api_key = os.environ.get("OPENAI_API_KEY")
-if not api_key:
-    st.error("🔑 OpenAI API key not found! Please set it in environment variables.")
-    st.stop()
+st.title("🚀 翻译器测试版")
 
-client = OpenAI(api_key=api_key)
+# 先测试基础功能
+name = st.text_input("输入测试文本:")
+if name:
+    st.write(f"你输入了: {name}")
 
-LANG_MAP = {
-    "zh-cn": "Chinese",
-    "en": "English",
-    "ru": "Russian"
-}
-
-
-def translate_with_gpt(text, target_language):
-    try:
-        response = client.responses.create(
-            model="gpt-4o-mini",
-            input=[
-                {
-                    "role": "system",
-                    "content": f"Translate the text into {target_language} in a natural, fluent tone."
-                },
-                {
-                    "role": "user",
-                    "content": text
-                }
-            ]
-        )
-        return response.output_text
-    except Exception as e:
-        return f"翻译错误: {str(e)}"
-
-
-st.title("Tara's Translator App 💜")
-
-text = st.text_area("Enter text to translate:")
-
-if st.button("Translate"):
-    if text.strip():
-        try:
-            detected = detect(text)
-            input_lang = LANG_MAP.get(detected, "English")
-
-            st.write(f"**Detected Language:** {input_lang}")
-
-            targets = [lang for lang in LANG_MAP.values() if lang != input_lang]
-
-            for target in targets:
-                st.subheader(target)
-                translation = translate_with_gpt(text, target)
-                st.write(translation)
-
-        except Exception as e:
-            st.error(f"检测语言时出错: {str(e)}")
+# 测试openai导入
+try:
+    from openai import OpenAI
+    st.success("✅ openai 包导入成功！")
+    
+    # 测试环境变量
+    if "OPENAI_API_KEY" in os.environ:
+        st.success("✅ 环境变量检测成功！")
     else:
-        st.warning("Please enter some text.")
+        st.warning("⚠️ 环境变量未设置")
+        
+except ImportError:
+    st.error("❌ openai 包导入失败")
